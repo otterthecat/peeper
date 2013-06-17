@@ -1,52 +1,84 @@
 var exec = require('child_process').exec;
 var fs = require('fs');
 
+/* Properties
+***************/
 var options = {
 
-	less: {src: 'less/main.less', target: 'css/main.css'}
+  less: {src: 'less/main.less', target: 'css/main.css'}
 }
 
+var watchedFiles = {};
 
+/* Methods
+/*************/
 var config = function(obj){
 
-	for(item in obj){
+  for(item in obj){
 
-		options[item] = obj[item];
-	}
+      options[item] = obj[item];
+  }
 
-	return this;
+  return this;
 }
 
 var get = function(prop_str){
 
-	if(typeof prop_str === 'string'){
+  if(typeof prop_str === 'string'){
 
-		return options[prop_str];
-	}
+      return options[prop_str];
+  }
 
-	if(typeof prop_str === 'undefined'){
+  if(typeof prop_str === 'undefined'){
 
-		return options;
-	}
+      return options;
+  }
 
-	return false;
+  return false;
 }
 
 var peep = function(callback){
 
-	fs.watch(options.less.src, function(event, filename){
+  watchedFiles[options.less.src] = fs.watch(options.less.src, function(event, filename){
 
-		exec('lessc ' + options.less.src + ' ' + options.less.target, function(error, stdout, stderr){
+      exec('lessc ' + options.less.src + ' ' + options.less.target, function(error, stdout, stderr){
 
 
-			console.log('compiled CSS file %s from LESS at  %s', options.less.target, options.less.src);
-		});
+        console.log('compiled CSS file %s from LESS at  %s', options.less.target, options.less.src);
+      });
 
-		callback(event, filename);
-	});
+      if(typeof callback === 'function'){
+      
+        callback(event, filename);
+      }
+  });
+
+  return watchedFiles;
 }
 
+var kill = function(name, callback){
 
-exports.config 		= config;
-exports.get 		= get;
-exports.peep 		= peep;
+  if(typeof name === "string" && typeof watchedFiles[name] !== 'undefined'){
+
+      watchedFiles[name].close();
+  } else {
+
+    console.log("Can't determine what " + name + " is, so killing all watched files");
+
+    for(item in watchedFiles){
+      console.log("item is ");
+      console.log(watchedFiles[item]);
+      watchedFiles[item].close();
+    }
+  }
+
+  if(typeof callback === 'function'){
+
+    callback();
+  }
+}
+
+exports.config      = config;
+exports.get         = get;
+exports.peep        = peep;
+exports.kill        = kill;
