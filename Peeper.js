@@ -66,8 +66,7 @@ var kill = function(name, callback){
     console.log("Can't determine what " + name + " is, so killing all watched files");
 
     for(item in watchedFiles){
-      console.log("item is ");
-      console.log(watchedFiles[item]);
+
       watchedFiles[item].close();
     }
   }
