@@ -5,7 +5,11 @@ var fs = require('fs');
 ***************/
 var options = {
 
-  less: {src: 'less/main.less', target: 'css/main.css'}
+  less: {
+    watch: "less/",
+    src: 'less/main.less',
+    target: 'css/main.css'
+  }
 }
 
 var watchedFiles = {};
@@ -39,7 +43,7 @@ var get = function(prop_str){
 
 var peep = function(callback){
 
-  watchedFiles[options.less.src] = fs.watch(options.less.src, function(event, filename){
+  watchedFiles[options.less.watch] = fs.watch(options.less.watch, function(event, filename){
 
       exec('lessc ' + options.less.src + ' ' + options.less.target, function(error, stdout, stderr){
 
