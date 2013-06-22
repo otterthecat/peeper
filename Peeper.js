@@ -5,11 +5,11 @@ var fs = require('fs');
 ***************/
 var options = {
 
-  less: {
-    watch: "less/",
-    src: 'less/main.less',
-    target: 'css/main.css'
-  }
+  watch: "less/",
+  files: [{
+      src: 'less/main.less',
+      target: 'css/main.css'
+    }]
 }
 
 var watchedFiles = {};
@@ -41,20 +41,25 @@ var get = function(prop_str){
   return false;
 }
 
+var _doLESS = function(element, index, array){
+
+  exec('lessc ' + element.src + ' ' + element.target, function(error, stdout, stderr){
+
+    if(error === null){
+
+      console.log('compiled CSS file %s from LESS at %s', element.target, element.src);
+    } else {
+
+      console.log(stderr);
+    }
+  });
+}
+
 var peep = function(callback){
 
-  watchedFiles[options.less.watch] = fs.watch(options.less.watch, function(event, filename){
+  watchedFiles[options.watch] = fs.watch(options.watch, function(event, filename){
 
-      exec('lessc ' + options.less.src + ' ' + options.less.target, function(error, stdout, stderr){
-
-
-        console.log('compiled CSS file %s from LESS at  %s', options.less.target, options.less.src);
-      });
-
-      if(typeof callback === 'function'){
-      
-        callback(event, filename);
-      }
+      options.files.forEach(_doLESS);
   });
 
   return watchedFiles;
