@@ -28,9 +28,10 @@ You can customize the defaults like so:
 
 	var p = require('./Peeper');
 
-	p.config({
-			watch: 'myDirectory',
-			files: [{
+	// first argument is the file you want to watch,
+	// second argument is an array of objects, each storing
+	// the source ('src') and target paths
+	p.watch('myDirectory', [{
 				src: 'myDirectory/myLess.less',
 				target: 'myDirectory/myCSS.css'
 			}]
@@ -39,3 +40,10 @@ You can customize the defaults like so:
 	// this will now watch a directory named 'myDirectory', look for file 'myDirectory/myLESS.less',
 	// and compile a CSS file to 'myDirectory/myCSS.css'
 	p.peep();
+
+	// to stop watching, use the .kill() method
+	p.kill();
+
+	// optionally, you can pass the watched file if you are watching mulitple files
+	// no argument will stop watching ALL processes
+	p.kill('myDirectory');
