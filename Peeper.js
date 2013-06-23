@@ -3,43 +3,30 @@ var fs = require('fs');
 
 /* Properties
 ***************/
-var options = {
+var config        = {};
+var watched_files = {};
 
-  watch: "less/",
-  files: [{
+config['less/'] = [{
       src: 'less/main.less',
       target: 'css/main.css'
-    }]
-}
-
-var watchedFiles = {};
+    }];
 
 /* Methods
 /*************/
-var config = function(obj){
-
-  for(item in obj){
-
-      options[item] = obj[item];
-  }
-
-  return this;
-}
-
 var get = function(prop_str){
 
   if(typeof prop_str === 'string'){
 
-      return options[prop_str];
+      return config[prop_str];
   }
 
   if(typeof prop_str === 'undefined'){
 
-      return options;
+      return config;
   }
 
   return false;
-}
+};
 
 var _doLESS = function(element, index, array){
 
@@ -53,30 +40,56 @@ var _doLESS = function(element, index, array){
       console.log(stderr);
     }
   });
-}
+};
 
-var peep = function(callback){
+var watch = function(path, obj_list){
 
-  watchedFiles[options.watch] = fs.watch(options.watch, function(event, filename){
+  if(typeof obj_list === 'object' && obj_list.length > 0){
 
-      options.files.forEach(_doLESS);
-  });
+    config[path] = obj_list;
+  };
 
-  return watchedFiles;
-}
+  return config;
+};
+
+var peep = function(path, callback){
+
+  path = (typeof path === 'undefined' && typeof callback === 'undefined') ? '*' : path;
+
+  if(path === '*'){
+
+    for(item in config){
+
+      watched_files[item] = fs.watch(item, function(event, filename){
+
+          config[item].forEach(_doLESS);
+      });
+    }
+
+  } else {
+
+    watched_files[path] = fs.watch(path, function(event, filename){
+
+        config[path].forEach(_doLESS);
+    });
+  }
+
+
+  return watched_files;
+};
 
 var kill = function(name, callback){
 
-  if(typeof name === "string" && typeof watchedFiles[name] !== 'undefined'){
+  if(typeof name === "string" && typeof watched_files[name] !== 'undefined'){
 
-      watchedFiles[name].close();
+      watched_files[name].close();
   } else {
 
     console.log("Can't determine what " + name + " is, so killing all watched files");
 
-    for(item in watchedFiles){
+    for(item in watched_files){
 
-      watchedFiles[item].close();
+      watched_files[item].close();
     }
   }
 
@@ -84,9 +97,9 @@ var kill = function(name, callback){
 
     callback();
   }
-}
+};
 
-exports.config      = config;
 exports.get         = get;
+exports.watch       = watch;
 exports.peep        = peep;
 exports.kill        = kill;
