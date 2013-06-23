@@ -1,6 +1,7 @@
 var exec = require('child_process').exec;
 var fs = require('fs');
 
+
 /* Properties
 ***************/
 var config        = {};
@@ -10,6 +11,24 @@ config['less/'] = [{
       src: 'less/main.less',
       target: 'css/main.css'
     }];
+
+
+/* 'Private' Methods
+/* ******************/
+var _doLESS = function(element, index, array){
+
+  exec('lessc ' + element.src + ' ' + element.target, function(error, stdout, stderr){
+
+    if(error === null){
+
+      console.log('compiled CSS file %s from LESS at %s', element.target, element.src);
+    } else {
+
+      console.log(stderr);
+    }
+  });
+};
+
 
 /* Methods
 /*************/
@@ -28,19 +47,6 @@ var get = function(prop_str){
   return false;
 };
 
-var _doLESS = function(element, index, array){
-
-  exec('lessc ' + element.src + ' ' + element.target, function(error, stdout, stderr){
-
-    if(error === null){
-
-      console.log('compiled CSS file %s from LESS at %s', element.target, element.src);
-    } else {
-
-      console.log(stderr);
-    }
-  });
-};
 
 var watch = function(path, obj_list){
 
@@ -52,9 +58,11 @@ var watch = function(path, obj_list){
   return config;
 };
 
-var peep = function(path, callback){
 
-  path = (typeof path === 'undefined' && typeof callback === 'undefined') ? '*' : path;
+var peep = function(params){
+
+  path = (typeof params.path === 'undefined') ? '*' : path;
+  callback = (typeof params.callback === 'function') ? params.callback : function(){};
 
   if(path === '*'){
 
@@ -63,20 +71,21 @@ var peep = function(path, callback){
       watched_files[item] = fs.watch(item, function(event, filename){
 
           config[item].forEach(_doLESS);
+          callback();
       });
     }
-
   } else {
 
     watched_files[path] = fs.watch(path, function(event, filename){
 
         config[path].forEach(_doLESS);
+        callback();
     });
   }
 
-
   return watched_files;
 };
+
 
 var kill = function(name, callback){
 
@@ -99,6 +108,9 @@ var kill = function(name, callback){
   }
 };
 
+
+/* Exports
+/**************/
 exports.get         = get;
 exports.watch       = watch;
 exports.peep        = peep;
