@@ -31,7 +31,7 @@ You can customize the defaults like so:
 	// first argument is the file you want to watch,
 	// second argument is an array of objects, each storing
 	// the source ('src') and target paths
-	p.watch('myDirectory', [{
+	p.set('myDirectory', [{
 				src: 'myDirectory/myLess.less',
 				target: 'myDirectory/myCSS.css'
 			}]

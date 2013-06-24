@@ -48,7 +48,7 @@ var get = function(prop_str){
 };
 
 
-var watch = function(path, obj_list){
+var set = function(path, obj_list){
 
   if(typeof obj_list === 'object' && obj_list.length > 0){
 
